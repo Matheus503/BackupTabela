@@ -1,0 +1,22 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZCOPIA_J_1BNFDOC_TOP
+*&---------------------------------------------------------------------*
+
+REPORT  zcopia_j_1bnfdoc MESSAGE-ID yo.
+
+TABLES: j_1bnfdoc, yj1bnfdoc, zzdocnum.
+
+DATA: gt_j_1bnfdoc TYPE TABLE OF j_1bnfdoc,
+      gt_yj1bnfdoc TYPE TABLE OF yj1bnfdoc.
+
+DATA: gs_zzdocnum TYPE zzdocnum,
+      gs_yj1bnfdoc TYPE yj1bnfdoc.
+
+"Variable
+DATA: gv_execute TYPE abap_bool,
+      gv_answer.
+
+CONSTANTS: BEGIN OF gc_option,
+            backup  TYPE zzdocnum-option_ VALUE 'BACKUP',
+            restore TYPE zzdocnum-option_ VALUE 'RESTORE',
+           END OF gc_option.
