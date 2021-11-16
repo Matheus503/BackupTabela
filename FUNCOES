@@ -1,0 +1,147 @@
+*----------------------------------------------------------------------*
+***INCLUDE ZCOPIA_J_1BNFDOC_F_BACKUP_RF01 .
+*----------------------------------------------------------------------*
+*&---------------------------------------------------------------------*
+*&      Form  F_BACKUP_RESTORE
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM f_backup_restore .
+  IF rb_01 EQ abap_true.A
+
+    "Transferindo dados para a tabela Y
+    SELECT *
+    FROM j_1bnfdoc
+    INTO TABLE gt_j_1bnfdoc
+           WHERE docnum IN s_docnum
+           AND credat IN s_credat.
+
+    CLEAR: gv_answer.
+    CALL FUNCTION 'POPUP_TO_CONFIRM' " Funcao de confirmacao
+      EXPORTING
+        titlebar              = text-t01 "Confirmação
+        text_question         = text-t02 "'Deseja realmente fazer o backup?'
+        text_button_1         = text-t03 "'Sim'
+        icon_button_1         = 'ICON_CHECKED'
+        text_button_2         = text-t04 "'Não'
+        icon_button_2         = 'ICON_INCOMPLETE'
+        display_cancel_button = ' '
+      IMPORTING
+        answer                = gv_answer
+      EXCEPTIONS
+        text_not_found        = 1
+        OTHERS                = 2.
+    IF gv_answer EQ '2'.
+      RETURN.
+    ENDIF.
+
+    MODIFY yj1bnfdoc FROM TABLE gt_j_1bnfdoc.
+    COMMIT WORK AND WAIT.
+    MESSAGE s000 WITH text-m02.
+
+    IF p_save EQ abap_true.
+
+      SORT gt_j_1bnfdoc DESCENDING.
+
+      READ TABLE gt_j_1bnfdoc INTO gs_yj1bnfdoc INDEX 1.
+      IF sy-subrc IS INITIAL.
+
+        CLEAR: gs_zzdocnum.
+        gs_zzdocnum-mandt   = sy-mandt.
+        gs_zzdocnum-docnum  = gs_yj1bnfdoc-docnum.
+        gs_zzdocnum-option_ = gc_option-backup.
+
+        MODIFY zzdocnum FROM gs_zzdocnum.
+
+      ENDIF.
+
+    ENDIF.
+
+  ELSE.
+
+    "Restaurando dados para a j_1bnfdoc
+    SELECT *
+      FROM yj1bnfdoc
+      INTO TABLE gt_yj1bnfdoc
+      FOR ALL ENTRIES IN gt_j_1bnfdoc
+      WHERE docnum = gt_j_1bnfdoc-docnum.
+
+    CLEAR: gv_answer.
+    CALL FUNCTION 'POPUP_TO_CONFIRM' " Funcao de confirmacao
+      EXPORTING
+        titlebar              = text-t01 "Confirmação
+        text_question         = text-t05 "'Deseja realmente restaurar os dados?'
+        text_button_1         = text-t03 "'Sim'
+        icon_button_1         = 'ICON_CHECKED'
+        text_button_2         = text-t04 "'Não'
+        icon_button_2         = 'ICON_INCOMPLETE'
+        display_cancel_button = ' '
+      IMPORTING
+        answer                = gv_answer
+      EXCEPTIONS
+        text_not_found        = 1
+        OTHERS                = 2.
+    IF gv_answer EQ '2'.
+      RETURN.
+    ENDIF.
+
+    MODIFY j_1bnfdoc FROM TABLE gt_yj1bnfdoc.
+    COMMIT WORK AND WAIT.
+    MESSAGE s000 WITH text-m02.
+
+    IF p_save EQ abap_true.
+
+      SORT gt_yj1bnfdoc DESCENDING.
+
+      READ TABLE gt_yj1bnfdoc INTO gs_yj1bnfdoc INDEX 1.
+      IF sy-subrc IS INITIAL.
+
+        CLEAR: gs_zzdocnum.
+        gs_zzdocnum-mandt   = sy-mandt.
+        gs_zzdocnum-docnum  = gs_yj1bnfdoc-docnum.
+        gs_zzdocnum-option_ = gc_option-restore.
+
+        MODIFY zzdocnum FROM gs_zzdocnum.
+
+      ENDIF.
+
+    ENDIF.
+
+  ENDIF.
+ENDFORM.                    " F_BACKUP_RESTORE
+*&---------------------------------------------------------------------*
+*&      Form  F_VERIFICA_EXEC
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM f_verifica_exec .
+
+  DATA: lt_wplist TYPE TABLE OF wpinfo.
+
+  CLEAR: lt_wplist[].
+  CALL FUNCTION 'TH_WPINFO'
+    TABLES
+      wplist     = lt_wplist
+    EXCEPTIONS
+      send_error = 1
+      OTHERS     = 2.
+
+  IF sy-subrc IS INITIAL.
+
+    READ TABLE lt_wplist TRANSPORTING NO FIELDS WITH KEY wp_report = sy-repid.
+    IF sy-subrc IS INITIAL.
+*      gv_execute = abap_true.
+      MESSAGE i000 WITH text-m01."O programa já está sendo executado
+      LEAVE PROGRAM.
+
+    ENDIF.
+
+  ENDIF.
+
+ENDFORM.                    " F_VERIFICA_EXEC
