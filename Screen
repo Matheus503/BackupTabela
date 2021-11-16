@@ -1,0 +1,24 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZCOPIA_J_1BNFDOC_SCR
+*&---------------------------------------------------------------------*
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text-s01.
+
+SELECT-OPTIONS: s_docnum FOR j_1bnfdoc-docnum,
+                s_credat FOR j_1bnfdoc-credat.
+
+SELECTION-SCREEN SKIP 1.
+
+SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE text-s02.
+
+PARAMETERS: rb_01 RADIOBUTTON GROUP rb DEFAULT 'X',
+            rb_02 RADIOBUTTON GROUP rb.
+
+SELECTION-SCREEN END OF BLOCK b2.
+
+SELECTION-SCREEN SKIP 1.
+
+PARAMETERS: p_save AS CHECKBOX DEFAULT 'X'.
+
+
+SELECTION-SCREEN END OF BLOCK b1.
