@@ -1,0 +1,9 @@
+INCLUDE zcopia_j_1bnfdoc_top.
+INCLUDE zcopia_j_1bnfdoc_scr.
+
+
+PERFORM f_verifica_exec.
+PERFORM f_backup_restore.
+
+
+INCLUDE zcopia_j_1bnfdoc_f_backup_rf01.
